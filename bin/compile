@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# bin/compile <build-dir> <cache-dir>
+set -e
+
+mktmpdir() {
+  dir=$(mktemp -t fakesu-$1-XXXX)
+  rm -rf $dir
+  mkdir -p $dir
+  echo $dir
+}
+
+function indent() {
+  c='s/^/       /'
+  case $(uname) in
+    Darwin) sed -l "$c";;
+    *)      sed -u "$c";;
+  esac
+}
+
+BUILDPACK_DIR=`cd $(dirname $0); cd ..; pwd`
+BUILD_DIR=$1
+CACHE_DIR=$2
+
+GRAPHVIZ_BUILD="$(mktmpdir graphviz)"
+
+mkdir -p $CACHE_DIR/.tools/graphviz
+
+export PATH=/sbin:/usr/sbin:$PATH:
+
+echo "-----> Fetching and installing graphviz"
+cd $WGET_BUILD
+curl -O http://www.graphviz.org/pub/graphviz/stable/SOURCES/graphviz-2.28.0.tar.gz >/dev/null 2>&1
+tar zxvf graphviz-2.28.0.tar.gz >/dev/null 2>&1
+cd graphviz-2.28.0
+./configure --prefix=$CACHE_DIR/.tools/graphviz >/dev/null 2>&1
+make >/dev/null 2>&1
+make install >/dev/null 2>&1
+echo "grapvhiz installed" | indent
+
+exit 0
